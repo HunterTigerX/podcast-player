@@ -1,12 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Podcast Player</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    
+    <div class="container" id="app">
+        <header class="header">
+            <span class="header__badge">Spotify exclusive</span>
+            <span class="header__title">Podcasts</span>
+            <span class="header__sub" id="counter">0 podcasts</span>
+        </header>
+        <div class="search__wrapper">
+            <label for="podcast__search">Search the podcast:</label>
+            <input type="search" id="podcast__search" name="podcast_query" />
+            <button>Search</button>
+        </div>
+        <div class="grid" id="podcastGrid"></div>
+    </div>
 </body>
-<script type="module" src="main.ts"></script>
+<script type="module" src="./dist/main.js"></script>
+
 </html>
