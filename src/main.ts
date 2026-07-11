@@ -1,7 +1,7 @@
 import songsData from './data.js';
 import searchId from './searchById.js';
 import searchResults from './searchResponse.js';
-import { convertMsToDate } from './utilities/convertDate.js';
+import { convertMsToDate, convertTime } from './utilities/convert.js';
 
 const counter = document.getElementById('counter');
 const searchBoxDom = document.getElementById('podcast__search');
@@ -10,7 +10,14 @@ const returnMain = document.querySelector('.header__main');
 const mainWrapper = document.querySelector('.main__wrapper');
 const searchWrapper = document.getElementById('search__wrapper');
 const id_page = document.querySelector('.id_page');
+const audioPlayer = document.querySelector('.audio__player');
+const audioData = audioPlayer as HTMLAudioElement;
+const audioControls = document.querySelector('.audio__controls');
+const audioProgress = document.querySelector('.audio__progress');
+const progressData = audioProgress as HTMLInputElement;
 
+const audioCurrentTime = document.querySelector('.current__time');
+const audioTotalTime = document.querySelector('.total__time');
 let timerId: number | undefined;
 
 // class App {
@@ -73,7 +80,6 @@ function renderSearchPage() {
       id_page.innerHTML = '';
     }
 
-    console.log('v1');
     // We have text in the search bar
     // We check if we have any cards in the data.ts
     if (!searchResults || !searchResults.results) {
@@ -95,7 +101,6 @@ function renderSearchPage() {
       if (item.image) {
         cover.style.backgroundImage = `url('${item.image}')`;
       } else {
-        console.log(`Image ling is missing for the image ${index}`);
         cover.style.backgroundImage = 'none';
       }
 
@@ -127,7 +132,6 @@ function renderSearchPage() {
 
 function renderIdPage(id: string) {
   if (counter && grid) {
-    console.log('v3');
     // we opened the podcast list by id
 
     grid.innerHTML = '';
@@ -241,9 +245,13 @@ function renderIdPage(id: string) {
       const episodeTitle = document.createElement('div');
       episodeTitle.className = 'episode-item__title';
       const titleLink = document.createElement('a');
-      titleLink.href = item.link || '#';
-      titleLink.target = '_blank';
       titleLink.textContent = item.title;
+      titleLink.addEventListener('click', (e) => {
+        switchAudioTrack(item.audio);
+        if (audioData) {
+          playAudioPlayer()
+        }
+      })
       episodeTitle.append(titleLink);
 
       const episodeDescription = document.createElement('div');
@@ -303,7 +311,6 @@ function renderMainPage() {
       if (item.image) {
         cover.style.backgroundImage = `url('${item.image}')`;
       } else {
-        console.log(`Image ling is missing for the image ${index}`);
         cover.style.backgroundImage = 'none';
       }
 
@@ -352,5 +359,102 @@ if (searchBoxDom) {
     }
   });
 }
+
+async function toggleAudioPlayer() {
+  if (audioPlayer && audioControls) {
+    if (audioData.paused) {
+      const playPromise = audioData.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(async () => {
+            audioControls.textContent = 'Pause';
+          })
+          .catch((error) => {
+            audioControls.textContent = 'Play';
+          });
+      }
+      audioControls.textContent = 'Pause';
+    } else {
+      audioData.pause();
+      audioControls.textContent = 'Play';
+    }
+  }
+}
+
+async function playAudioPlayer() {
+  if (audioPlayer && audioControls) {
+      const playPromise = audioData.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(async () => {
+            audioControls.textContent = 'Pause';
+          })
+          .catch((error) => {
+            audioControls.textContent = 'Play';
+          });
+      }
+  }
+}
+
+function handleAudioTimeChange(timeChange: number) {
+  audioData.currentTime = timeChange;
+  if (audioCurrentTime) {
+    audioCurrentTime.textContent = convertTime(timeChange);
+  }
+}
+
+if (audioControls && audioProgress) {
+  audioControls.addEventListener('click', (e) => {
+    toggleAudioPlayer();
+  });
+
+  audioProgress.addEventListener('input', (event) => {
+    const target = event.target as HTMLInputElement;
+    handleAudioTimeChange(Number(target.value));
+  });
+
+  audioProgress.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement;
+    handleAudioTimeChange(Number(target.value));
+  });
+}
+
+function switchAudioTrack(link: string) {
+  if (audioPlayer && audioCurrentTime && audioTotalTime) {
+    audioData.src = link;
+  }
+}
+// remove later!!!
+switchAudioTrack('https://www.listennotes.com/e/p/a5ae21acf75a43538b635cf6b089f0b3/');
+
+audioData.addEventListener('loadedmetadata', () => {
+  if (audioCurrentTime && audioTotalTime) {
+    if (Math.floor(audioData.duration)) {
+      progressData.max = String(Math.floor(audioData.duration));
+    }
+    audioCurrentTime.textContent = convertTime(audioData.currentTime);
+    audioTotalTime.textContent = convertTime(audioData.duration);
+  }
+});
+
+audioData.addEventListener('timeupdate', (event) => {
+  if (audioCurrentTime && progressData) {
+    audioCurrentTime.textContent = convertTime(audioData.currentTime);
+    progressData.value = String(audioData.currentTime);
+  }
+});
+
+audioData.addEventListener('pause', (event) => {
+  if (audioControls) {
+    audioControls.textContent = 'Play';
+  }
+});
+
+
+audioData.addEventListener('play', (event) => {
+  if (audioControls) {
+    audioControls.textContent = 'Pause';
+  }
+});
 
 renderPodcasts();

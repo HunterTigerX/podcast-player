@@ -26,3 +26,17 @@ export function convertMsToDate(ms: number) {
     date: `${dayOfWeek}, ${day} ${month} ${year}`,
   };
 }
+
+export function convertTime(seconds: number) {
+  if (seconds < 0) {
+    return '00:00:00';
+  } else {
+    let hours = Math.floor(seconds / 3600);
+
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const newSeconds = Math.floor(seconds - hours * 3600 - minutes * 60);
+
+    const pad = (num: number) => String(num).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(newSeconds)}`;
+  }
+}

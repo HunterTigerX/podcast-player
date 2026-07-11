@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Podcast Player</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="./favicon.ico">
 </head>
 
 <body>
@@ -17,6 +18,13 @@
             <span class="header__sub" id="counter">0 podcasts</span>
         </header>
         <div class="main__wrapper main__page">
+            <div class="player">
+                <audio class="audio__player"></audio>
+                <button class="audio__controls">Play</button>
+                <input type="range" class="range audio__progress" min="0" max="1" step="1" value="0"></input>
+                <div class="progress__numbers"><span class="current__time">00:00:00</span> / <span
+                        class="total__time">00:00:00</span> </div>
+            </div>
             <div class="search__wrapper" id="search__wrapper">
                 <label for="podcast__search">Search the podcast:</label>
                 <input type="search" id="podcast__search" name="podcast_query" value="" />

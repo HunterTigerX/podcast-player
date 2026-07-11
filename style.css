@@ -12,6 +12,10 @@
       padding: 2rem 1.5rem;
   }
 
+  a:hover {
+    cursor: pointer;
+  }
+
   .container {
       max-width: 1280px;
       margin: 0 auto;
@@ -38,7 +42,7 @@
   }
 
   .header__main:hover {
-    cursor: pointer;
+      cursor: pointer;
   }
 
   .header__title {
@@ -63,9 +67,9 @@
   }
 
   .search__wrapper {
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 20px;
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 20px;
   }
 
   .grid {
@@ -171,15 +175,15 @@
   }
 
   .podcast_description {
-    width: 55%;
-    display: flex;
-    flex-direction: column;
-    color: black
+      width: 55%;
+      display: flex;
+      flex-direction: column;
+      color: black
   }
 
   .preview__description__publisher_big {
-    color: purple;
-margin: 5px 0;
+      color: purple;
+      margin: 5px 0;
   }
 
   .preview__image {
@@ -195,10 +199,10 @@ margin: 5px 0;
   }
 
   .id_list_top_wrapper {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
   }
 
   .preview__description__publisher {
@@ -219,25 +223,25 @@ margin: 5px 0;
       display: flex;
       justify-content: flex-end;
       transition: opacity 0.15s;
-    grid-column-start: 2;
-    grid-row-start: 2;
+      grid-column-start: 2;
+      grid-row-start: 2;
   }
 
   .preview__description__channel_link:hover {
       opacity: 0.7;
   }
 
-  
+
   .preview__description__button:hover {
       opacity: 0.7;
   }
 
 
   .preview__description__ad {
-    grid-column: span 2 / span 2;
-    grid-column-start: 1;
-    grid-row-start: 3;
-    margin-top: 10px;
+      grid-column: span 2 / span 2;
+      grid-column-start: 1;
+      grid-row-start: 3;
+      margin-top: 10px;
   }
 
   .preview__description__prices {
@@ -263,12 +267,15 @@ margin: 5px 0;
       transform: scale(0.97);
   }
 
-    .preview__description__publisher, .preview__description__ad, .preview__description__prices {
-    margin-left: 10px;
+  .preview__description__publisher,
+  .preview__description__ad,
+  .preview__description__prices {
+      margin-left: 10px;
   }
 
-  .preview__description__channel_link, .preview__description__button {
-    margin-right: 10px;
+  .preview__description__channel_link,
+  .preview__description__button {
+      margin-right: 10px;
   }
 
   .episodes-section {
@@ -331,6 +338,69 @@ margin: 5px 0;
       -webkit-box-orient: vertical;
       overflow: hidden;
   }
+
+  .player {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+  }
+
+  .audio__controls {
+      width: 50px;
+  }
+
+  .progress__numbers {
+      color: wheat;
+  }
+
+  .range {
+      width: 40%;
+  }
+
+  input[type="range"]:hover {
+      cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0 0 1px rgba(13, 13, 13, 0);
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 1.3px;
+      border: 0.2px solid rgba(1, 1, 1, 0);
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+      height: 15px;
+      width: 15px;
+      border-radius: 50px;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -4.5px;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  }
+
+  input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 8.4px;
+      cursor: pointer;
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0 0 1px rgba(13, 13, 13, 0);
+      background: #ffffff;
+      border-radius: 1.3px;
+      border: 0.2px solid rgba(1, 1, 1, 0);
+  }
+
+  input[type=range]::-moz-range-thumb {
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(13, 13, 13, 0);
+      height: 15px;
+      width: 15px;
+      border-radius: 50px;
+      background: #ffc600;
+      cursor: pointer;
+  }
+
+
 
   @media (max-width: 600px) {
       .podcast-card {
