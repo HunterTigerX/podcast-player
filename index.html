@@ -11,16 +11,21 @@
 <body>
     <div class="container" id="app">
         <header class="header">
+            <div class="header__badge header__main">Main</div>
             <span class="header__badge">Spotify exclusive</span>
             <span class="header__title">Podcasts</span>
             <span class="header__sub" id="counter">0 podcasts</span>
         </header>
-        <div class="search__wrapper">
-            <label for="podcast__search">Search the podcast:</label>
-            <input type="search" id="podcast__search" name="podcast_query" value="The Art of Char" />
-            <button>Search</button>
+        <div class="main__wrapper main__page">
+            <div class="search__wrapper" id="search__wrapper">
+                <label for="podcast__search">Search the podcast:</label>
+                <input type="search" id="podcast__search" name="podcast_query" value="" />
+                <button>Search</button>
+            </div>
+            <div class="grid" id="podcastGrid"></div>
+            <div class="id_page"></div>
         </div>
-        <div class="grid" id="podcastGrid"></div>
+
     </div>
 </body>
 <script type="module" src="./dist/main.js"></script>

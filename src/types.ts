@@ -110,3 +110,76 @@ interface searchPodcast {
     publisher_highlighted: string;
     listen_score_global_rank: string;
 }
+
+export interface PodcastDetailResponse {
+    id: string;
+    rss: string;
+    type: string;
+    email: string;
+    extra: IdExtra;
+    image: string;
+    title: string;
+    country: string;
+    website: string;
+    episodes: EpisodeDetail[];
+    language: string;
+    genre_ids: number[];
+    itunes_id: number;
+    publisher: string;
+    thumbnail: string;
+    is_claimed: boolean;
+    description: string;
+    looking_for: IdLookingFor;
+    has_sponsors: boolean;
+    listen_score: number;
+    total_episodes: number;
+    listennotes_url: string;
+    audio_length_sec: number;
+    explicit_content: boolean;
+    latest_episode_id: string;
+    latest_pub_date_ms: number;
+    earliest_pub_date_ms: number;
+    has_guest_interviews: boolean;
+    next_episode_pub_date: number;
+    update_frequency_hours: number;
+    listen_score_global_rank: string;
+}
+
+interface IdExtra {
+    url1: string;
+    url2: string;
+    url3: string;
+    spotify_url: string;
+    youtube_url: string;
+    linkedin_url: string;
+    wechat_handle: string;
+    patreon_handle: string;
+    twitter_handle: string;
+    facebook_handle: string;
+    amazon_music_url: string;
+    instagram_handle: string;
+}
+
+interface EpisodeDetail {
+    id: string;
+    link: string;
+    audio: string;
+    image: string;
+    title: string;
+    thumbnail: string;
+    description: string;
+    pub_date_ms: number;
+    guid_from_rss: string;
+    listennotes_url: string;
+    audio_length_sec: number;
+    explicit_content: boolean;
+    maybe_audio_invalid: boolean;
+    listennotes_edit_url: string;
+}
+
+interface IdLookingFor {
+    guests: boolean;
+    cohosts: boolean;
+    sponsors: boolean;
+    cross_promotion: boolean;
+}
