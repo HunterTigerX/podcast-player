@@ -1,15 +1,17 @@
 import songsData from './data.js';
 import searchId from './searchById.js';
 import searchResults from './searchResponse.js';
+import type { AudioProgress } from './types.js';
 import { convertMsToDate, convertTime } from './utilities/convert.js';
 
 const counter = document.getElementById('counter');
 const searchBoxDom = document.getElementById('podcast__search');
 const grid = document.getElementById('podcastGrid');
 const returnMain = document.querySelector('.header__main');
+const returnHistory = document.querySelector('.header__saved');
 const mainWrapper = document.querySelector('.main__wrapper');
 const searchWrapper = document.getElementById('search__wrapper');
-const id_page = document.querySelector('.id_page');
+const id__page = document.querySelector('.id__page');
 const audioPlayer = document.querySelector('.audio__player');
 const audioData = audioPlayer as HTMLAudioElement;
 const audioControls = document.querySelector('.audio__controls');
@@ -66,6 +68,7 @@ function renderPodcasts() {
   if (mainWrapper) {
     renderMainPage();
   }
+  // renderHistoryPage();
 }
 
 function renderSearchPage() {
@@ -76,8 +79,8 @@ function renderSearchPage() {
 
     grid.innerHTML = '';
 
-    if (id_page) {
-      id_page.innerHTML = '';
+    if (id__page) {
+      id__page.innerHTML = '';
     }
 
     // We have text in the search bar
@@ -120,7 +123,7 @@ function renderSearchPage() {
 
     if (mainWrapper) {
       mainWrapper.classList.add('search__page');
-      mainWrapper.classList.remove('id__page', 'main__page');
+      mainWrapper.classList.remove('id__page', 'main__page', 'history__page');
     }
 
     // Podcast counter
@@ -242,17 +245,49 @@ function renderIdPage(id: string) {
         `${convertMsToDate(item.pub_date_ms).date}. Duration: ${Math.round(item.audio_length_sec / 60)} min` ||
         '';
 
+      const buttonToFaf = document.createElement('button');
+      buttonToFaf.textContent = 'Add to fav';
+      buttonToFaf.classList.add('fav__button__episodes');
+      const audioList = getAudioList();
+
+      const savedList = {
+        progress: 0,
+        duration: 0,
+        url: item.audio,
+        host: searchId.publisher,
+        title: item.title,
+        image: item.image,
+      };
+
+      const filteredList = audioList.find((saved) => saved.url === item.audio);
+      if (filteredList) {
+        buttonToFaf.disabled = true;
+      } else {
+        buttonToFaf.disabled = false;
+      }
+
+      buttonToFaf.addEventListener('click', (e) => {
+        addToAudioList(savedList);
+        buttonToFaf.disabled = true;
+      });
+
       const episodeTitle = document.createElement('div');
       episodeTitle.className = 'episode-item__title';
       const titleLink = document.createElement('a');
       titleLink.textContent = item.title;
       titleLink.addEventListener('click', (e) => {
         switchAudioTrack(item.audio);
-        if (audioData) {
-          playAudioPlayer()
+
+        // returns false if exists in localstorage
+        if (addToAudioList(savedList)) {
+          if (audioData) {
+            playAudioPlayer();
+          }
+        } else {
+          restoreAudioPlayer(item.audio);
         }
-      })
-      episodeTitle.append(titleLink);
+      });
+      episodeTitle.append(buttonToFaf, titleLink);
 
       const episodeDescription = document.createElement('div');
       episodeDescription.className = 'episode-item__description';
@@ -266,10 +301,10 @@ function renderIdPage(id: string) {
 
     main.append(top__page__wrapper, episodesSection);
 
-    if (mainWrapper && id_page) {
+    if (mainWrapper && id__page) {
       mainWrapper.classList.add('id__page');
-      mainWrapper.classList.remove('main__page', 'search__page');
-      id_page.append(main);
+      mainWrapper.classList.remove('main__page', 'search__page', 'history__page');
+      id__page.append(main);
     }
 
     const word = count % 10 === 1 && count % 100 !== 11 ? 'Podcast' : 'Podcasts';
@@ -282,8 +317,8 @@ function renderMainPage() {
     // clear main page when we return or clear search bar
     grid.innerHTML = '';
 
-    if (id_page) {
-      id_page.innerHTML = '';
+    if (id__page) {
+      id__page.innerHTML = '';
     }
 
     if (searchWrapper) {
@@ -329,7 +364,7 @@ function renderMainPage() {
     });
     if (mainWrapper) {
       mainWrapper.classList.add('main__page');
-      mainWrapper.classList.remove('search__page', 'id__page');
+      mainWrapper.classList.remove('search__page', 'id__page', 'history__page');
     }
     // Podcast counter
     const count = songsData.podcasts.length;
@@ -338,9 +373,100 @@ function renderMainPage() {
   }
 }
 
+function renderHistoryPage() {
+  const savedList = getAudioList();
+  if (grid && counter) {
+    // clear main page when we return or clear search bar
+    grid.innerHTML = '';
+
+    if (id__page) {
+      id__page.innerHTML = '';
+    }
+
+    if (searchWrapper) {
+      searchWrapper.style.display = 'none';
+    }
+
+    // Search bar is empty
+    // We check if we have any cards in the data.ts
+    if (!savedList || savedList.length === 0) {
+      grid.innerHTML = '<p>Podcasts are missing</p>';
+      counter.textContent = '0 podcasts';
+      return;
+    }
+
+    savedList.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.addEventListener('click', (e) => {
+        if (e.target) {
+          const target = e.target as HTMLTextAreaElement;
+
+          if (!target.classList.contains('remove__button')) {
+            if (audioData.src !== item.url) {
+              switchAudioTrack(item.url);
+              if (audioData) {
+                restoreAudioPlayer(item.url);
+              }
+            } else {
+              toggleAudioPlayer();
+            }
+          }
+        }
+      });
+
+      const cover = document.createElement('div');
+      cover.className = 'card__cover';
+
+      if (item.image) {
+        cover.style.backgroundImage = `url('${item.image}')`;
+      } else {
+        cover.style.backgroundImage = 'none';
+      }
+
+      const title = document.createElement('div');
+      title.className = 'card__title';
+      title.textContent = `${item.title} by ${item.host}` || '';
+
+      const author = document.createElement('div');
+      author.className = 'card__author';
+      author.textContent = `${convertTime(item.progress)} / ${convertTime(item.duration)}` || '';
+
+      const remove__from__fav = document.createElement('button');
+      remove__from__fav.classList.add('preview__description__button', 'remove__button');
+      remove__from__fav.innerText = 'Remove from fav';
+      remove__from__fav.addEventListener('click', (e) => {
+        removeAudioItem(item.url);
+      });
+
+      card.appendChild(cover);
+      card.appendChild(title);
+      card.appendChild(author);
+      card.appendChild(remove__from__fav);
+      grid.appendChild(card);
+    });
+
+    if (mainWrapper) {
+      mainWrapper.classList.add('history__page');
+      mainWrapper.classList.remove('id__page', 'main__page', 'search__page');
+    }
+
+    // Podcast counter
+    const count = savedList.length;
+    const word = count % 10 === 1 && count % 100 !== 11 ? 'Podcast' : 'Podcasts';
+    counter.textContent = `${count} ${word}`;
+  }
+}
+
 if (returnMain) {
   returnMain.addEventListener('click', (e) => {
     renderMainPage();
+  });
+}
+
+if (returnHistory) {
+  returnHistory.addEventListener('click', (e) => {
+    renderHistoryPage();
   });
 }
 
@@ -354,8 +480,6 @@ if (searchBoxDom) {
         renderSearchPage();
         debounceFunction(makeAPICall, 200, target.value);
       }
-    } else {
-      console.log('Error in searchBoxDom');
     }
   });
 }
@@ -383,16 +507,44 @@ async function toggleAudioPlayer() {
 
 async function playAudioPlayer() {
   if (audioPlayer && audioControls) {
-      const playPromise = audioData.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(async () => {
-            audioControls.textContent = 'Pause';
-          })
-          .catch((error) => {
-            audioControls.textContent = 'Play';
-          });
+    const playPromise = audioData.play();
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(async () => {
+          audioControls.textContent = 'Pause';
+        })
+        .catch((error) => {
+          audioControls.textContent = 'Play';
+        });
+    }
+  }
+}
+
+async function restoreAudioPlayer(url: string) {
+  const list = getAudioList();
+  if (list) {
+    const item = list.find((item) => item.url === url);
+    if (item) {
+      if (item.progress - 10 <= 0) {
+        audioData.currentTime = 0;
+      } else {
+        audioData.currentTime = item.progress - 10;
       }
+    }
+  }
+  if (audioPlayer && audioControls) {
+    const playPromise = audioData.play();
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(async () => {
+          audioControls.textContent = 'Pause';
+        })
+        .catch((error) => {
+          audioControls.textContent = 'Play';
+        });
+    }
   }
 }
 
@@ -424,14 +576,22 @@ function switchAudioTrack(link: string) {
     audioData.src = link;
   }
 }
-// remove later!!!
-switchAudioTrack('https://www.listennotes.com/e/p/a5ae21acf75a43538b635cf6b089f0b3/');
 
 audioData.addEventListener('loadedmetadata', () => {
   if (audioCurrentTime && audioTotalTime) {
     if (Math.floor(audioData.duration)) {
       progressData.max = String(Math.floor(audioData.duration));
     }
+
+    const audioDataLS = getAudioList();
+    if (audioDataLS) {
+      const item = audioDataLS.find((item) => item.url === audioData.src);
+      if (item) {
+        item.duration = audioData.duration;
+        saveAudioList(audioDataLS);
+      }
+    }
+
     audioCurrentTime.textContent = convertTime(audioData.currentTime);
     audioTotalTime.textContent = convertTime(audioData.duration);
   }
@@ -441,6 +601,12 @@ audioData.addEventListener('timeupdate', (event) => {
   if (audioCurrentTime && progressData) {
     audioCurrentTime.textContent = convertTime(audioData.currentTime);
     progressData.value = String(audioData.currentTime);
+
+    const duration = String(audioData.duration) === 'NaN' ? 0 : audioData.duration;
+    const currentTime = String(audioData.currentTime) === 'NaN' ? 0 : audioData.currentTime;
+
+    updateAudioProgress(audioData.src, currentTime);
+    saveLocalProgress(audioData.src, currentTime);
   }
 });
 
@@ -450,11 +616,93 @@ audioData.addEventListener('pause', (event) => {
   }
 });
 
-
 audioData.addEventListener('play', (event) => {
   if (audioControls) {
     audioControls.textContent = 'Pause';
   }
 });
+
+function getAudioList(): AudioProgress[] {
+  const data = localStorage.getItem('audioProgressList');
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function saveAudioList(list: AudioProgress[]) {
+  localStorage.setItem('audioProgressList', JSON.stringify(list));
+}
+
+function removeAudioItem(url: string) {
+  const list = getAudioList();
+  const initialLength = list.length;
+  const filteredList = list.filter((item) => item.url !== url);
+
+  if (filteredList.length === initialLength) {
+    console.warn(`Элемент с url "${url}" не найден`);
+    return false;
+  }
+
+  saveAudioList(filteredList);
+  renderHistoryPage();
+}
+
+function saveLocalProgress(url: string, newProgress: number) {
+  const audioData = getAudioList();
+  if (audioData) {
+    const item = audioData.find((item) => item.url === url);
+    if (item) {
+      item.progress = newProgress;
+      saveAudioList(audioData);
+    }
+  }
+}
+
+function updateAudioProgress(url: string, newProgress: number) {
+  const audioData = getAudioList();
+
+  if (audioData) {
+    const item = audioData.find((item) => item.url === url);
+
+    if (mainWrapper && mainWrapper.classList.contains('history__page')) {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card) => {
+        const coverElement = card.querySelector('.card__cover');
+        if (coverElement) {
+          const bgImage = (coverElement as HTMLElement).style.backgroundImage;
+
+          const cardUrl = bgImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+          if (cardUrl === item?.image) {
+            const timerElement = card.querySelector('.card__author');
+            if (timerElement) {
+              timerElement.innerHTML = `${convertTime(newProgress)} / ${convertTime(item.duration)}`;
+            }
+          }
+        }
+      });
+    }
+  }
+}
+
+function addToAudioList(data: AudioProgress): boolean {
+  const list = getAudioList();
+  const exists = list.some((item) => {
+    return item.url === data.url;
+  });
+
+  if (!exists) {
+    list.push(data);
+    saveAudioList(list);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// remove later!!!
+switchAudioTrack('https://www.listennotes.com/e/p/a5ae21acf75a43538b635cf6b089f0b3/');
 
 renderPodcasts();

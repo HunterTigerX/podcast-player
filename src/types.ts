@@ -183,3 +183,12 @@ interface IdLookingFor {
     sponsors: boolean;
     cross_promotion: boolean;
 }
+
+export interface AudioProgress {
+    progress: number;
+    duration: number;
+    url: string;
+    host: string;
+    title: string;
+    image: string;
+}

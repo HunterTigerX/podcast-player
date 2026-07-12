@@ -13,7 +13,19 @@
   }
 
   a:hover {
-    cursor: pointer;
+      cursor: pointer;
+  }
+
+  .header__main:hover,
+  .header__saved:hover {
+      cursor: pointer;
+      opacity: 0.9;
+  }
+
+  .header__main:active,
+  .header__saved:active {
+      opacity: 0.9;
+      color: rgb(124, 124, 124)
   }
 
   .container {
@@ -70,7 +82,28 @@
       display: flex;
       flex-direction: row;
       margin-bottom: 20px;
+      align-items: center;
+      gap: 10px;
   }
+
+
+  #podcast__search {
+      padding: 10px 16px;
+      border: 1px solid #535353;
+      border-radius: 20px;
+      background-color: #282828;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+
+  #podcast__search:focus {
+      border-color: #1db954;
+      background-color: #333333;
+  }
+
 
   .grid {
       display: grid;
@@ -112,6 +145,8 @@
       background-position: center;
       background-color: #2a2a2a;
       background-blend-mode: normal;
+      background-repeat: no-repeat;
+      background-size: contain;
   }
 
   .card__cover:not([style*="background-image"]) {
@@ -295,7 +330,7 @@
   .episode-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 7px;
       padding: 1.2rem 0 1.2rem 0;
       border-bottom: 1px solid #f0f2f6;
   }
@@ -313,6 +348,10 @@
   }
 
   .episode-item__title {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
       font-size: 1.1rem;
       font-weight: 600;
       line-height: 1.3;
@@ -339,18 +378,51 @@
       overflow: hidden;
   }
 
+  .main__wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+  }
+
   .player {
       display: flex;
       flex-direction: row;
       gap: 10px;
   }
 
-  .audio__controls {
-      width: 50px;
+
+  .audio__controls,
+  .search__wrapper button {
+      width: 90px;
+      background-color: #1db954;
+      color: #ffffff;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+
+  .audio__controls:hover,
+  .fav__button__episodes:hover,
+  .search__wrapper button:hover {
+      background-color: #1ed760;
+      transform: scale(1.02);
+  }
+
+  .audio__controls:active,
+  .fav__button__episodes:active,
+  .search__wrapper button:active {
+      transform: scale(0.98);
   }
 
   .progress__numbers {
+      display: flex;
+      align-items: center;
       color: wheat;
+      gap: 7.5px;
   }
 
   .range {
@@ -400,6 +472,28 @@
       cursor: pointer;
   }
 
+  .fav__button__episodes {
+      width: 100px;
+      background-color: #1db954;
+      color: #ffffff;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+
+  .fav__button__episodes:disabled {
+      background-color: gray;
+      pointer-events: auto;
+      cursor: not-allowed;
+  }
+
+  .fav__button__episodes:disabled:hover {
+      background-color: darkgray;
+  }
 
 
   @media (max-width: 600px) {
