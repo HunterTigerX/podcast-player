@@ -1,7 +1,4 @@
-import type { PodcastData } from "../types"
-
-const songsData: PodcastData = 
-{
+const songsData = {
     "id": 93,
     "name": "Business",
     "total": 778,
@@ -1154,6 +1151,6 @@ const songsData: PodcastData =
     "listennotes_url": "https://www.listennotes.com/best-business-podcasts-93/",
     "next_page_number": 3,
     "previous_page_number": 1
-}
-
-export default songsData
+};
+export default songsData;
+//# sourceMappingURL=data.js.map

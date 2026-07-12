@@ -119,7 +119,8 @@ class App {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        alert(`HTTP error! status: ${response.status} Your are blocked for too many requests. You can try again later, you can use VPN, you can use another browser or the incognito mode`)
+        console.warn(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
