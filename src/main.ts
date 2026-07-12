@@ -1,9 +1,8 @@
-import songsData from './data.js';
-import searchId from './searchById.js';
-import searchResults from './searchResponse.js';
-import type { AudioProgress } from './types.js';
+import type { AudioProgress, PodcastData, PodcastDetailResponse, SearchResponse } from './types.js';
 import { convertMsToDate, convertTime } from './utilities/convert.js';
+// import { Client } from 'podcast-api';
 
+const overlay = document.getElementById('loading__overlay');
 const counter = document.getElementById('counter');
 const searchBoxDom = document.getElementById('podcast__search');
 const grid = document.getElementById('podcastGrid');
@@ -22,33 +21,120 @@ const audioCurrentTime = document.querySelector('.current__time');
 const audioTotalTime = document.querySelector('.total__time');
 let timerId: number | undefined;
 
-// class App {
-//   fetchPodcasts(query: string | void): void {
+let searchResults: SearchResponse = {
+  took: 0,
+  count: 0,
+  total: 0,
+  results: [],
+  next_offset: 0,
+};
 
-// const url = query ? `https://listen-api-test.listennotes.com/api/v2/search?q=${query}&type=podcast` :
-//   "https://listen-api-test.listennotes.com/api/v2/best_podcasts?sort=recent_published_first&page=1";
+let searchId: PodcastDetailResponse = {
+  id: '',
+  rss: '',
+  type: '',
+  email: '',
+  extra: {
+    url1: '',
+    url2: '',
+    url3: '',
+    spotify_url: '',
+    youtube_url: '',
+    linkedin_url: '',
+    wechat_handle: '',
+    patreon_handle: '',
+    twitter_handle: '',
+    facebook_handle: '',
+    amazon_music_url: '',
+    instagram_handle: '',
+  },
+  image: '',
+  title: '',
+  country: '',
+  website: '',
+  episodes: [],
+  language: '',
+  genre_ids: [],
+  itunes_id: 0,
+  publisher: '',
+  thumbnail: '',
+  is_claimed: false,
+  description: '',
+  looking_for: {
+    guests: false,
+    cohosts: false,
+    sponsors: false,
+    cross_promotion: false,
+  },
+  has_sponsors: false,
+  listen_score: 0,
+  total_episodes: 0,
+  listennotes_url: '',
+  audio_length_sec: 0,
+  explicit_content: false,
+  latest_episode_id: '',
+  latest_pub_date_ms: 0,
+  earliest_pub_date_ms: 0,
+  has_guest_interviews: false,
+  next_episode_pub_date: 0,
+  update_frequency_hours: 0,
+  listen_score_global_rank: '',
+};
 
-//     fetch(url, {
-//       method: "GET",
-//       headers: {
-//         Accept: "application/json",
-//       },
-//     })
-//       .then((res) => res.json())
-//       .then((json) => console.log(json));
-//   }
-// }
+let songsData: PodcastData = {
+  id: 0,
+  name: '',
+  total: 0,
+  has_next: false,
+  podcasts: [],
+  parent_id: 0,
+  page_number: 0,
+  has_previous: false,
+  listennotes_url: '',
+  next_page_number: 0,
+  previous_page_number: 0,
+};
 
-// const podcastApiSearch = new App();
+class App {
+  async fetchPodcasts(): Promise<any> {
+    const url =
+      'https://listen-api-test.listennotes.com/api/v2/best_podcasts?sort=recent_published_first&page=1';
+    return await this.fetch(url);
+  }
+  async searchPodcasts(query: string) {
+    const url = `https://listen-api-test.listennotes.com/api/v2/search?q=${query}&type=podcast`;
+    return await this.fetch(url);
+  }
+  async returnPodcastsList(id: string) {
+    const url = `https://listen-api-test.listennotes.com/api/v2/podcasts/${id}`;
+    return await this.fetch(url);
+  }
 
-function fetchPodcasts(query: string | void): void {
-  console.log(query);
+  async fetch(url: string): Promise<any> {
+    showLoading();
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } finally {
+      hideLoading();
+    }
+  }
 }
-fetchPodcasts();
 
-function makeAPICall(value: string) {
-  // const search__results = podcastApiSearch.fetchPodcasts(value)
-  console.log('Search executed', value);
+const podcastApiSearch = new App();
+
+async function makeAPICall(value: string) {
+  console.log('making api call');
+  searchResults = await podcastApiSearch.searchPodcasts(value);
   renderSearchPage();
 }
 
@@ -133,7 +219,8 @@ function renderSearchPage() {
   }
 }
 
-function renderIdPage(id: string) {
+async function renderIdPage(id: string) {
+  searchId = await podcastApiSearch.returnPodcastsList(id);
   if (counter && grid) {
     // we opened the podcast list by id
 
@@ -312,7 +399,8 @@ function renderIdPage(id: string) {
   }
 }
 
-function renderMainPage() {
+async function renderMainPage() {
+  songsData = await podcastApiSearch.fetchPodcasts();
   if (grid && counter) {
     // clear main page when we return or clear search bar
     grid.innerHTML = '';
@@ -477,7 +565,6 @@ if (searchBoxDom) {
       if (target.value === '') {
         renderMainPage();
       } else {
-        renderSearchPage();
         debounceFunction(makeAPICall, 200, target.value);
       }
     }
@@ -485,30 +572,39 @@ if (searchBoxDom) {
 }
 
 async function toggleAudioPlayer() {
-  if (audioPlayer && audioControls) {
-    if (audioData.paused) {
-      const playPromise = audioData.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(async () => {
-            audioControls.textContent = 'Pause';
-          })
-          .catch((error) => {
-            audioControls.textContent = 'Play';
-          });
+  if (audioData && audioData.src === '') {
+    alert('no audio selected');
+    return;
+  } else {
+    if (audioPlayer && audioControls) {
+      if (audioData.paused) {
+        showLoading();
+        const playPromise = audioData.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(async () => {
+              audioControls.textContent = 'Pause';
+            })
+            .catch((error) => {
+              audioControls.textContent = 'Play';
+            })
+            .finally(() => {
+              hideLoading();
+            });
+        }
+        audioControls.textContent = 'Pause';
+      } else {
+        audioData.pause();
+        audioControls.textContent = 'Play';
       }
-      audioControls.textContent = 'Pause';
-    } else {
-      audioData.pause();
-      audioControls.textContent = 'Play';
     }
   }
 }
 
 async function playAudioPlayer() {
   if (audioPlayer && audioControls) {
+    showLoading();
     const playPromise = audioData.play();
-
     if (playPromise !== undefined) {
       playPromise
         .then(async () => {
@@ -516,6 +612,9 @@ async function playAudioPlayer() {
         })
         .catch((error) => {
           audioControls.textContent = 'Play';
+        })
+        .finally(() => {
+          hideLoading();
         });
     }
   }
@@ -534,6 +633,7 @@ async function restoreAudioPlayer(url: string) {
     }
   }
   if (audioPlayer && audioControls) {
+    showLoading();
     const playPromise = audioData.play();
 
     if (playPromise !== undefined) {
@@ -543,6 +643,9 @@ async function restoreAudioPlayer(url: string) {
         })
         .catch((error) => {
           audioControls.textContent = 'Play';
+        })
+        .finally(() => {
+          hideLoading();
         });
     }
   }
@@ -702,7 +805,18 @@ function addToAudioList(data: AudioProgress): boolean {
   }
 }
 
-// remove later!!!
-switchAudioTrack('https://www.listennotes.com/e/p/a5ae21acf75a43538b635cf6b089f0b3/');
+function showLoading() {
+  if (overlay) {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function hideLoading() {
+  if (overlay) {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
 
 renderPodcasts();
