@@ -108,12 +108,16 @@ class App {
                 method: 'GET',
                 headers: { Accept: 'application/json' },
             });
+            console.log(response);
             if (!response.ok) {
                 alert(`HTTP error! status: ${response.status} Your are blocked for too many requests. You can try again later, you can use VPN, you can use another browser or the incognito mode`);
                 console.warn(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
             return data;
+        }
+        catch {
+            alert(`HTTP error! Your are blocked for too many requests. You can try again later, you can use VPN, you can use another browser or the incognito mode`);
         }
         finally {
             hideLoading();
