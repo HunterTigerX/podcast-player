@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="./favicon.ico">
+</head>
+
+<body>
+    <div class="container" id="app">
+        <header class="header">
+            <div class="header__badge header__main">Main</div>
+            <div class="header__badge header__saved">Saved</div>
+            <span class="header__badge">Spotify exclusive</span>
+            <span class="header__title">Podcasts</span>
+            <span class="header__sub" id="counter">0 podcasts</span>
+        </header>
+        <div class="main__wrapper main__page">
+            <div id="loading__overlay" class="loading__overlay">
+                <div class="loading__child">
+                    <div class="loading__bar">⏳</div>
+                    <div class="loading__text">Загрузка данных...</div>
+                    <div class="loading__shadow"></div>
+                </div>
+            </div>
+            <div class="player">
+                <audio class="audio__player"></audio>
+                <button class="audio__controls">Play</button>
+                <input type="range" class="range audio__progress" min="0" max="1" step="1" value="0"></input>
+                <div class="progress__numbers"><span class="current__time">00:00:00</span> / <span
+                        class="total__time">00:00:00</span> </div>
+            </div>
+            <div class="search__wrapper" id="search__wrapper">
+                <label for="podcast__search">Search the podcast:</label>
+                <input type="search" id="podcast__search" name="podcast_query" value="" />
+            </div>
+            <div class="grid" id="podcastGrid"></div>
+            <div class="id__page"></div>
+            <div class="history__page"></div>
+        </div>
+
+    </div>
+    <footer></footer>
+</body>
+<script type="module" src="./dist/main.js"></script>
+
+</html>
